@@ -2,6 +2,8 @@ import tkinter.ttk as ttk
 import tkinter.messagebox as msgbox
 from tkinter import *
 from tkinter import filedialog
+from PIL import Image
+import os
 
 root = Tk()
 root.title("Sample")
@@ -33,6 +35,37 @@ def browse_dest_path():
     txt_dest_path.delete(0,END)
     txt_dest_path.insert(0,folder_selected)
 
+def merge_image():
+    #print(list_file.get(0,END))
+    images = [Image.open(x) for x in list_file.get(0,END)]
+
+    # size[0]=width size[1]=height
+    #widths = [x.size[0] for x in images]
+    #height = [y.size[1] for y in images]
+
+    widths,heights = zip(*(x.size for x in images))
+
+    #print(widths)
+    #print(height)
+
+    max_width,total_height = max(widths),sum(heights)
+    #print(max_width)
+    #print(total_height)
+
+    result_img = Image.new("RGB",(max_width,total_height),(255,255,255))
+    y_offset = 0
+    for idx,img in enumerate(images):
+        result_img.paste(img,(0,y_offset))
+        y_offset += img.size[1]
+
+        progress = (idx + 1) / len(images) * 100
+        p_var.set(progress)
+        progressbar.update()
+
+    dest_path = os.path.join(txt_dest_path.get(),"Test.png")
+    result_img.save(dest_path)
+    msgbox.showinfo("","成功しました")
+
 # 実行
 def start():
     print("size",cmb_size.get())
@@ -47,6 +80,7 @@ def start():
         msgbox.showerror("Error","保存先パスを設定してください")
         return
 
+    merge_image()
     
 
 # file Frame
